@@ -1,35 +1,45 @@
-// Test browser support
-window.SpeechRecognition = window.SpeechRecognition ||
-window.webkitSpeechRecognition ||
-null;
+function Listener (textareaId) {
+    var that = this;
 
-if (window.SpeechRecognition === null) {
-  document.getElementById('ws-unsupported').classList.remove('hidden');
-  document.getElementById('button-play-ws').setAttribute('disabled', 'disabled');
-  document.getElementById('button-stop-ws').setAttribute('disabled', 'disabled');
-}
-else {
-  var recognizer = new window.SpeechRecognition();
-  var transcription = document.getElementById('transcription');
-  var log = document.getElementById('log');
+    window.SpeechRecognition = window.SpeechRecognition ||
+    window.webkitSpeechRecognition ||
+    null;
 
-  // Recogniser doesn't stop listening even if the user pauses
-  recognizer.continuous = true;
-
-  // Start recognising
-  recognizer.onresult = function(event) {
-      console.log('done')
-    transcription.textContent = '';
-
-    for (var i = event.resultIndex; i < event.results.length; i++) {
-      if (event.results[i].isFinal) {
-        transcription.textContent = event.results[i][0].transcript + ' (Confidence: ' + event.results[i][0].confidence + ')';
-      } else {
-        transcription.textContent += event.results[i][0].transcript;
-      }
+    if (window.SpeechRecognition === null) {
+        alert('speech recognition not supported');
     }
-  };
+    else {
+        var recognizer = new window.SpeechRecognition();
+        var transcription = document.getElementById(textareaId);
 
-  recognizer.interimResults = true;
-  recognizer.start();
+        // Recogniser doesn't stop listening even if the user pauses
+        recognizer.continuous = true;
+
+        // Start recognising
+        recognizer.onresult = function(event) {
+            var string = '';
+            var isFinal;
+            transcription.textContent = '';
+
+            for (var i = event.resultIndex; i < event.results.length; i++) {
+                isFinal = event.results[i].isFinal;
+                var result = event.results[i][0].transcript;
+
+                if (isFinal) {
+                    string = result;
+                }
+                else {
+                    string += result;
+                }
+                transcription.textContent = string;
+            }
+
+            if (that.onResult) {
+                that.onResult(string, isFinal);
+            }
+        };
+
+        recognizer.interimResults = true;
+        recognizer.start();
+    }
 }
