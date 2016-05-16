@@ -1,3 +1,4 @@
+
 function Listener (textareaId) {
     var that = this;
 
@@ -7,6 +8,8 @@ function Listener (textareaId) {
 
         // Recogniser doesn't stop listening even if the user pauses
         recognizer.continuous = true;
+
+        var resettedResultIndex = null;
 
         // Start recognising
         recognizer.onresult = function(event) {
@@ -19,8 +22,7 @@ function Listener (textareaId) {
                 var result = event.results[i][0].transcript;
 
                 if (isFinal) {
-                    string = result;
-                }
+                    string = result;              }
                 else {
                     string += result;
                 }
@@ -29,7 +31,6 @@ function Listener (textareaId) {
                     that.onResult(string, isFinal);
                 }
             }
-
         };
 
         recognizer.interimResults = true;

@@ -6,14 +6,13 @@ var firstTime = true;
 $(document).mousemove(function() {
     mouseX = event.pageX;
     mouseY = event.pageY;
-    textArea = createNodeAtCursor(mouseX, mouseY, '');
 });
 
 var listener = new Listener('listener');
 listener.onResult = function(text, isFinal) {
     if (isFinal === false) {
         if (textArea === null)  {
-            textArea = createNodeAtCursor(mouseX, mouseY, text);
+            textArea = createNodeAtCursor(mouseX + 15, mouseY - 25, text);
         }
         else {
             textArea.text(text);
@@ -26,12 +25,18 @@ listener.onResult = function(text, isFinal) {
 
     if (firstTime) {
         $('#directions').remove();
+        $('#hints').css('display', 'block');
     }
 }
 
+var timeout = null;
 $(document).mousemove(function(){
-    listener.reset();
-    textArea = null;
+    // clearTimeout(timeout);
+
+    // timeout = setTimeout(function() {
+        textArea = null;
+        listener.reset()
+    // }, 500);
 });
 
 
@@ -44,7 +49,8 @@ function createNodeAtCursor(x, y, text) {
                         'top': y+'px'
                     })
                     .draggable()
-                    .css('position', 'absolute');
+                    .css('position', 'absolute')
+                    .editable('dblclick');
     $div.append($span);
 
     $(document.body).append($div);

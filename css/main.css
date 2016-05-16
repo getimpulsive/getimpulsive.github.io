@@ -22,10 +22,41 @@ body {
     width: 300px;
 }
 
+#directions h1 {
+    text-align: center;
+}
+
+#hints {
+    display: none;
+    font-family: 'Lato', sans-serif;
+    position: absolute;
+    left: 0;
+    bottom: 20px;
+    font-size: 17px;
+}
+
+#hints li {
+    margin-top: 8px;
+}
+
 .node {
     position: absolute;
 }
 
 #listener {
     display: none;
+}
+
+.editable {
+  font-family: 'Sue Ellen Francisco', cursive;
+  font-size: 25px;
+  color: #EDEDED;
+  background-color: black;
+  border-width: 1px;
+  border-color: white;
+  border-style: solid;
+}
+
+ul {
+    list-style-type: none;
 }
