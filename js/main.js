@@ -1,6 +1,7 @@
 var mouseX;
 var mouseY;
 var textArea = null;
+var firstTime = true;
 
 $(document).mousemove(function() {
     mouseX = event.pageX;
@@ -9,7 +10,6 @@ $(document).mousemove(function() {
 });
 
 var listener = new Listener('listener');
-
 listener.onResult = function(text, isFinal) {
     if (isFinal === false) {
         if (textArea === null)  {
@@ -22,6 +22,10 @@ listener.onResult = function(text, isFinal) {
     else {
         textArea.text(text);
         textArea = null;
+    }
+
+    if (firstTime) {
+        $('#directions').remove();
     }
 }
 
@@ -38,8 +42,11 @@ function createNodeAtCursor(x, y, text) {
                     .css({
                         'left': x+'px',
                         'top': y+'px'
-                    });
+                    })
+                    .draggable()
+                    .css('position', 'absolute');
     $div.append($span);
+
     $(document.body).append($div);
 
     return $span;
