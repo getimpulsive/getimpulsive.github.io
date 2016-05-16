@@ -22,7 +22,7 @@ body {
     width: 300px;
 }
 
-.intro h1 {
+.intro h1, .intro p {
     text-align: center;
 }
 
@@ -90,4 +90,8 @@ ul {
 
 .keyword {
     font-weight: 700;
+}
+
+a {
+  color: #fc6f44;
 }
