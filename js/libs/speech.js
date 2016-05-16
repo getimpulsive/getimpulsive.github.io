@@ -35,6 +35,13 @@ function Listener (textareaId, onError) {
 
         recognizer.interimResults = true;
         recognizer.start();
+
+        this.start = function() {
+            recognizer.start();
+        }
+        this.stop = function() {
+            recognizer.stop();
+        }
     };
 
     window.SpeechRecognition = window.SpeechRecognition ||

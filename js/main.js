@@ -36,7 +36,7 @@ function photoSearch(query, callback, numPhotos) {
     var url = 'https://api.flickr.com/services/rest/?method=flickr.photos.search&api_key=0445640a9152dbfbcf619996da792930&tags=' + query +'&safe_search=0&per_page=20';
     $.getJSON(url + "&format=json&jsoncallback=?", function(data){
         var photos = data.photos.photo.map(function(item) {
-            return "https://farm"+ item.farm +".static.flickr.com/"+ item.server +"/"+ item.id +"_"+ item.secret +"_m.jpg";
+            return 'https://images.weserv.nl/?url=' + "farm"+ item.farm +".static.flickr.com/"+ item.server +"/"+ item.id +"_"+ item.secret +"_m.jpg";
         });
         function shuffle(a) {
             var j, x, i;
@@ -77,6 +77,7 @@ var mouseX;
 var mouseY;
 var textArea = null;
 var firstTime = true;
+var mute;
 
 $(document).on('mousemove mouseenter', function() {
     mouseX = event.pageX;
@@ -99,6 +100,7 @@ listener.onResult = function(text, isFinal) {
         }
     }
     else {
+        console.log(text)
         var hasQueryParam = false;
         ['have', 'give', 'find', 'show', 'get'].forEach(function(term) {
             if (text.indexOf(term) > -1) {
@@ -115,7 +117,7 @@ listener.onResult = function(text, isFinal) {
 
         if (hasQueryParam && hasPhotoParam) {
             var words = text.split(" ");
-            var keyword =  words[words.length - 2] + ' ' + words[words.length - 1];
+            var keyword = words[words.length - 1]; // words[words.length - 2] + ' ' + words[words.length - 1];
             console.log(keyword)
             photoSearch(keyword, function(imageUrls) {
                 var number = text.replace(/[^0-9.]/g, "");
@@ -139,8 +141,6 @@ listener.onResult = function(text, isFinal) {
                             textArea = createNodeAtCursor(mouseX + i*50, mouseY + i*20, imageHtmlString);
                         }
                     });
-                    textArea.html(imageHtmlString);
-
                 }
                 else {
                     textArea.html(StringHelper.format('<img src="{0}">', imageUrls[0]));
@@ -219,6 +219,24 @@ $(document).on('keyup', function(e) {
     }
 });
 
+$(document).bind('keyup keydown', function(e){
+    mute = e.shiftKey;
+    if (mute) {
+        listener.stop();
+    }
+    else {
+        try {
+            listener.start();
+        }
+        catch(err) {
+
+        }
+
+    }
+});
+
+
+
 function createNodeAtCursor(x, y, text) {
     $span = $('<span>').html(text);
     var $div = $('<div>')
@@ -229,7 +247,6 @@ function createNodeAtCursor(x, y, text) {
                     })
                     .draggable()
                     .css('position', 'absolute')
-                    .editable('dblclick')
                     .singleDoubleClick(
                         function(e) {
                             e.stopPropagation();
@@ -249,9 +266,18 @@ function createNodeAtCursor(x, y, text) {
                             }
                         },
                         function() {
-                            // do nothing
+                            var $img = $div.find('img');
+                            if ($img.length > 0) {
+                                var imageUrl = $img.attr('src');
+                                var win = window.open(imageUrl, '_blank');
+                            }
                         }
                     );
+
+    if ((text.indexOf('img') > -1) === false) {
+        $div.editable('dblclick')
+    }
+
     $div.append($span);
 
     $(document.body).append($div);
