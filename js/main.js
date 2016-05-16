@@ -66,7 +66,7 @@ jQuery.fn.singleDoubleClick = function(single_click_callback, double_click_callb
             double_click_callback.call(self, event);
           }
           clicks = 0;
-      }, timeout || 200);
+      }, timeout || 150);
       }
     });
   });
@@ -100,7 +100,7 @@ listener.onResult = function(text, isFinal) {
     }
     else {
         var hasQueryParam = false;
-        ['give', 'find', 'show', 'get'].forEach(function(term) {
+        ['have', 'give', 'find', 'show', 'get'].forEach(function(term) {
             if (text.indexOf(term) > -1) {
                 hasQueryParam = true;
             }
@@ -115,7 +115,7 @@ listener.onResult = function(text, isFinal) {
 
         if (hasQueryParam && hasPhotoParam) {
             var words = text.split(" ");
-            var keyword =  words[words.length - 1];
+            var keyword =  words[words.length - 2] + ' ' + words[words.length - 1];
             console.log(keyword)
             photoSearch(keyword, function(imageUrls) {
                 var number = text.replace(/[^0-9.]/g, "");
@@ -133,10 +133,10 @@ listener.onResult = function(text, isFinal) {
                         number = WORDS_TO_NUMBERS[wordNumber];
                     }
 
-                    var imageHtmlString = '';
                     imageUrls.forEach(function(imageUrl, i) {
                         if (i < number) {
-                            imageHtmlString += StringHelper.format('<img src="{0}">', imageUrls[i]);
+                            imageHtmlString = StringHelper.format('<img src="{0}">', imageUrls[i]);
+                            textArea = createNodeAtCursor(mouseX + i*50, mouseY + i*20, imageHtmlString);
                         }
                     });
                     textArea.html(imageHtmlString);
