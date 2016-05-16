@@ -1,14 +1,7 @@
 function Listener (textareaId) {
     var that = this;
 
-    window.SpeechRecognition = window.SpeechRecognition ||
-    window.webkitSpeechRecognition ||
-    null;
-
-    if (window.SpeechRecognition === null) {
-        alert('speech recognition not supported');
-    }
-    else {
+    this.reset = function() {
         var recognizer = new window.SpeechRecognition();
         var transcription = document.getElementById(textareaId);
 
@@ -32,14 +25,25 @@ function Listener (textareaId) {
                     string += result;
                 }
                 transcription.textContent = string;
+                if (that.onResult) {
+                    that.onResult(string, isFinal);
+                }
             }
 
-            if (that.onResult) {
-                that.onResult(string, isFinal);
-            }
         };
 
         recognizer.interimResults = true;
         recognizer.start();
+    };
+
+    window.SpeechRecognition = window.SpeechRecognition ||
+    window.webkitSpeechRecognition ||
+    null;
+
+    if (window.SpeechRecognition === null) {
+        alert('speech recognition not supported');
+    }
+    else {
+        this.reset();
     }
 }

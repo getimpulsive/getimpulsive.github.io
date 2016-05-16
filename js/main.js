@@ -1,19 +1,38 @@
-var listener = new Listener('listener');
-listener.onResult = function(text) {
-    console.log(text);
-}
+var mouseX;
+var mouseY;
+var textArea = null;
 
-$(document).click(function(e) {
-    var x = e.pageX;
-    var y = e.pageY;
-
-    addNodeAtCursor(x, y, 'hello');
+$(document).mousemove(function() {
+    mouseX = event.pageX;
+    mouseY = event.pageY;
+    textArea = createNodeAtCursor(mouseX, mouseY, '');
 });
 
-function addNodeAtCursor(x, y, text) {
+var listener = new Listener('listener');
 
-    var $span = $('<span>')
-                .text(text);
+listener.onResult = function(text, isFinal) {
+    if (isFinal === false) {
+        if (textArea === null)  {
+            textArea = createNodeAtCursor(mouseX, mouseY, text);
+        }
+        else {
+            textArea.text(text);
+        }
+    }
+    else {
+        textArea.text(text);
+        textArea = null;
+    }
+}
+
+$(document).mousemove(function(){
+    listener.reset();
+    textArea = null;
+});
+
+
+function createNodeAtCursor(x, y, text) {
+    $span = $('<span>').text(text);
     var $div = $('<div>')
                     .addClass('node')
                     .css({
@@ -22,4 +41,6 @@ function addNodeAtCursor(x, y, text) {
                     });
     $div.append($span);
     $(document.body).append($div);
+
+    return $span;
 }
