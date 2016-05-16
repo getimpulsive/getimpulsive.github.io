@@ -3,29 +3,35 @@
     <head>
         <meta charset="utf-8">
         <title>Impulse</title>
-        <link href='https://fonts.googleapis.com/css?family=Lato:300|Sue+Ellen+Francisco' rel='stylesheet' type='text/css'>
+        <link href='https://fonts.googleapis.com/css?family=Lato:300,700|Sue+Ellen+Francisco' rel='stylesheet' type='text/css'>
         <link rel="stylesheet" href="css/main.css" media="screen" title="no title" charset="utf-8">
     </head>
     <body>
-        <div id="directions">
+        <div id="directions" class="intro">
             <h1>Point and Speak</h1>
             <ol>
-                <li>Open this webpage in Google Chrome<br>(it will not work in other browsers).</li>
                 <li>Click "Allow" to enable the mic.</li>
                 <li>Before you speak, move your mouse to where you want the text to appear.</li>
                 <li>Speak loudly into your computer</li>
             </ol>
         </div>
+        <div id="error" class="intro">
+            <h1>Oh No!</h1>
+            <p>You're not using Google Chrome!</p>
+            <p>Get Impulsive only works in Google Chrome right now. Come back to this website with Google Chrome.</p>
+        </div>
 
         <div id="hints">
             <ul>
-                <li>Drag to move.</li>
-                <li>Double-click to edit.</li>
+                <li><span class="keyword">Drag</span> to move.</li>
+                <li><span class="keyword">Double-Click</span> to edit.</li>
+                <li><span class="keyword">Click</span> to select, <span class="keyword">Backspace</span> to delete.</li>
             </ul>
         </div>
 
         <textarea id="listener" placeholder="Say What You Want"></textarea>
 
+        <script src="js/libs/underscore.min.js"></script>
         <script src="js/libs/jquery-2.1.3.min.js"></script>
         <script src="js/libs/jquery-ui.js"></script>
         <script src="js/libs/jquery.editable.min.js"></script>

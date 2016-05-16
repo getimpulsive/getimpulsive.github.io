@@ -1,5 +1,5 @@
 
-function Listener (textareaId) {
+function Listener (textareaId, onError) {
     var that = this;
 
     this.reset = function() {
@@ -42,7 +42,9 @@ function Listener (textareaId) {
     null;
 
     if (window.SpeechRecognition === null) {
-        alert('speech recognition not supported');
+        if(onError) {
+            onError();
+        }
     }
     else {
         this.reset();
