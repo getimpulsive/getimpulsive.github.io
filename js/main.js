@@ -84,203 +84,214 @@ $(document).on('mousemove mouseenter', function() {
     mouseY = event.pageY;
 });
 
-function onError() {
+
+window.SpeechRecognition = window.SpeechRecognition ||
+window.webkitSpeechRecognition ||
+null;
+
+if (window.SpeechRecognition === null) {
     $('#directions').css('display', 'none');
     $('#error').css('display', 'block');
 }
+else {
+    $('#begin').on('click', function() {
+        $('#directions-part-1').css('display', 'none');
+        $('#directions-part-2').css('display', 'block');
 
-var listener = new Listener('listener', onError);
-listener.onResult = function(text, isFinal) {
-    if (isFinal === false) {
-        if (textArea === null)  {
-            textArea = createNodeAtCursor(mouseX, mouseY - 25, text);
-        }
-        else {
-            textArea.text(text);
-        }
-    }
-    else {
-        console.log(text)
-        var hasQueryParam = false;
-        ['have', 'give', 'find', 'show', 'get'].forEach(function(term) {
-            if (text.indexOf(term) > -1) {
-                hasQueryParam = true;
-            }
-        });
-
-        var hasPhotoParam = false;
-        ['picture', 'photo', 'image'].forEach(function(term) {
-            if (text.indexOf(term) > -1) {
-                hasPhotoParam = true;
-            }
-        });
-
-        if (hasQueryParam && hasPhotoParam) {
-            var words = text.split(" ");
-            var keyword = words[words.length - 1]; // words[words.length - 2] + ' ' + words[words.length - 1];
-            console.log(keyword)
-            photoSearch(keyword, function(imageUrls) {
-                var number = text.replace(/[^0-9.]/g, "");
-                var isNumeral = number !== '';
-
-                var isWordNumber = _.intersection(text.split(" "), _.keys(WORDS_TO_NUMBERS)).length > 0
-
-                if (isNumeral || isWordNumber) {
-                    var number;
-                    if (isNumeral) {
-                        number = number
-                    }
-                    else {
-                        var wordNumber =  _.intersection(text.split(" "), _.keys(WORDS_TO_NUMBERS))[0];
-                        number = WORDS_TO_NUMBERS[wordNumber];
-                    }
-
-                    imageUrls.forEach(function(imageUrl, i) {
-                        if (i < number) {
-                            imageHtmlString = StringHelper.format('<img src="{0}">', imageUrls[i]);
-                            textArea = createNodeAtCursor(mouseX + i*50, mouseY + i*20, imageHtmlString);
-                        }
-                    });
+        var listener = new Listener('listener');
+        listener.onResult = function(text, isFinal) {
+            if (isFinal === false) {
+                if (textArea === null)  {
+                    textArea = createNodeAtCursor(mouseX, mouseY - 25, text);
                 }
                 else {
-                    textArea.html(StringHelper.format('<img src="{0}">', imageUrls[0]));
+                    textArea.text(text);
+                }
+            }
+            else {
+                console.log(text)
+                var hasQueryParam = false;
+                ['have', 'give', 'find', 'show', 'get'].forEach(function(term) {
+                    if (text.indexOf(term) > -1) {
+                        hasQueryParam = true;
+                    }
+                });
+
+                var hasPhotoParam = false;
+                ['picture', 'photo', 'image'].forEach(function(term) {
+                    if (text.indexOf(term) > -1) {
+                        hasPhotoParam = true;
+                    }
+                });
+
+                if (hasQueryParam && hasPhotoParam) {
+                    var words = text.split(" ");
+                    var keyword = words[words.length - 1]; // words[words.length - 2] + ' ' + words[words.length - 1];
+                    console.log(keyword)
+                    photoSearch(keyword, function(imageUrls) {
+                        var number = text.replace(/[^0-9.]/g, "");
+                        var isNumeral = number !== '';
+
+                        var isWordNumber = _.intersection(text.split(" "), _.keys(WORDS_TO_NUMBERS)).length > 0
+
+                        if (isNumeral || isWordNumber) {
+                            var number;
+                            if (isNumeral) {
+                                number = number
+                            }
+                            else {
+                                var wordNumber =  _.intersection(text.split(" "), _.keys(WORDS_TO_NUMBERS))[0];
+                                number = WORDS_TO_NUMBERS[wordNumber];
+                            }
+
+                            imageUrls.forEach(function(imageUrl, i) {
+                                if (i < number) {
+                                    imageHtmlString = StringHelper.format('<img src="{0}">', imageUrls[i]);
+                                    textArea = createNodeAtCursor(mouseX + i*50, mouseY + i*20, imageHtmlString);
+                                }
+                            });
+                        }
+                        else {
+                            textArea.html(StringHelper.format('<img src="{0}">', imageUrls[0]));
+
+                        }
+
+                        textArea = null;
+                    })
+                }
+                else {
+                    textArea.text(text);
+                    textArea = null;
+                }
+            }
+
+            if (firstTime) {
+                $('#directions').remove();
+                $('#hints').css('display', 'block');
+            }
+        }
+
+        var timeout = null;
+        $(document).mousemove(function(){
+            // clearTimeout(timeout);
+
+            // timeout = setTimeout(function() {
+                textArea = null;
+                listener.reset()
+            // }, 500);
+        });
+
+        var $selected;
+
+        $(document).on('click', function(e) {
+            if ($selected && $(e.target).prop('tagName')  === 'HTML') {
+                $selected.removeClass('selected');
+            }
+        });
+
+        $(document).unbind('keydown').bind('keydown', function (event) {
+            var doPrevent = false;
+            if (event.keyCode === 8) {
+                var d = event.srcElement || event.target;
+                if ((d.tagName.toUpperCase() === 'INPUT' &&
+                     (
+                         d.type.toUpperCase() === 'TEXT' ||
+                         d.type.toUpperCase() === 'PASSWORD' ||
+                         d.type.toUpperCase() === 'FILE' ||
+                         d.type.toUpperCase() === 'SEARCH' ||
+                         d.type.toUpperCase() === 'EMAIL' ||
+                         d.type.toUpperCase() === 'NUMBER' ||
+                         d.type.toUpperCase() === 'DATE' )
+                     ) ||
+                     d.tagName.toUpperCase() === 'TEXTAREA') {
+                    doPrevent = d.readOnly || d.disabled;
+                }
+                else {
+                    if ($selected) {
+                        $selected.remove();
+                    }
+
+                    doPrevent = true;
+
+                }
+            }
+
+            if (doPrevent) {
+                event.preventDefault();
+            }
+        });
+
+
+        $(document).on('keyup', function(e) {
+            if (e.keyCode === 8) {
+                e.preventDefault();
+            }
+        });
+
+        $(document).bind('keyup keydown', function(e){
+            mute = e.shiftKey;
+            if (mute) {
+                listener.stop();
+            }
+            else {
+                try {
+                    listener.start();
+                }
+                catch(err) {
 
                 }
 
-                textArea = null;
-            })
-        }
-        else {
-            textArea.text(text);
-            textArea = null;
-        }
-    }
+            }
+        });
 
-    if (firstTime) {
-        $('#directions').remove();
-        $('#hints').css('display', 'block');
-    }
-}
 
-var timeout = null;
-$(document).mousemove(function(){
-    // clearTimeout(timeout);
 
-    // timeout = setTimeout(function() {
-        textArea = null;
-        listener.reset()
-    // }, 500);
-});
+        function createNodeAtCursor(x, y, text) {
+            $span = $('<span>').html(text);
+            var $div = $('<div>')
+                            .addClass('node')
+                            .css({
+                                'left': x+'px',
+                                'top': y+'px'
+                            })
+                            .draggable()
+                            .css('position', 'absolute')
+                            .singleDoubleClick(
+                                function(e) {
+                                    e.stopPropagation();
 
-var $selected;
+                                    if($div.hasClass('selected')) {
+                                        $div.removeClass('selected');
+                                        $selected = null;
+                                    }
+                                    else if($div.hasClass('selected') === false) {
+                                        if ($selected) {
+                                            $selected.removeClass('selected');
+                                        }
+                                        if ($div.find('input').length === 0) {
+                                            $div.addClass('selected');
+                                            $selected = $div;
+                                        }
+                                    }
+                                },
+                                function() {
+                                    var $img = $div.find('img');
+                                    if ($img.length > 0) {
+                                        var imageUrl = $img.attr('src');
+                                        var win = window.open(imageUrl, '_blank');
+                                    }
+                                }
+                            );
 
-$(document).on('click', function(e) {
-    if ($selected && $(e.target).prop('tagName')  === 'HTML') {
-        $selected.removeClass('selected');
-    }
-});
-
-$(document).unbind('keydown').bind('keydown', function (event) {
-    var doPrevent = false;
-    if (event.keyCode === 8) {
-        var d = event.srcElement || event.target;
-        if ((d.tagName.toUpperCase() === 'INPUT' &&
-             (
-                 d.type.toUpperCase() === 'TEXT' ||
-                 d.type.toUpperCase() === 'PASSWORD' ||
-                 d.type.toUpperCase() === 'FILE' ||
-                 d.type.toUpperCase() === 'SEARCH' ||
-                 d.type.toUpperCase() === 'EMAIL' ||
-                 d.type.toUpperCase() === 'NUMBER' ||
-                 d.type.toUpperCase() === 'DATE' )
-             ) ||
-             d.tagName.toUpperCase() === 'TEXTAREA') {
-            doPrevent = d.readOnly || d.disabled;
-        }
-        else {
-            if ($selected) {
-                $selected.remove();
+            if ((text.indexOf('img') > -1) === false) {
+                $div.editable('dblclick')
             }
 
-            doPrevent = true;
+            $div.append($span);
 
+            $(document.body).append($div);
+
+            return $span;
         }
-    }
-
-    if (doPrevent) {
-        event.preventDefault();
-    }
-});
-
-
-$(document).on('keyup', function(e) {
-    if (e.keyCode === 8) {
-        e.preventDefault();
-    }
-});
-
-$(document).bind('keyup keydown', function(e){
-    mute = e.shiftKey;
-    if (mute) {
-        listener.stop();
-    }
-    else {
-        try {
-            listener.start();
-        }
-        catch(err) {
-
-        }
-
-    }
-});
-
-
-
-function createNodeAtCursor(x, y, text) {
-    $span = $('<span>').html(text);
-    var $div = $('<div>')
-                    .addClass('node')
-                    .css({
-                        'left': x+'px',
-                        'top': y+'px'
-                    })
-                    .draggable()
-                    .css('position', 'absolute')
-                    .singleDoubleClick(
-                        function(e) {
-                            e.stopPropagation();
-
-                            if($div.hasClass('selected')) {
-                                $div.removeClass('selected');
-                                $selected = null;
-                            }
-                            else if($div.hasClass('selected') === false) {
-                                if ($selected) {
-                                    $selected.removeClass('selected');
-                                }
-                                if ($div.find('input').length === 0) {
-                                    $div.addClass('selected');
-                                    $selected = $div;
-                                }
-                            }
-                        },
-                        function() {
-                            var $img = $div.find('img');
-                            if ($img.length > 0) {
-                                var imageUrl = $img.attr('src');
-                                var win = window.open(imageUrl, '_blank');
-                            }
-                        }
-                    );
-
-    if ((text.indexOf('img') > -1) === false) {
-        $div.editable('dblclick')
-    }
-
-    $div.append($span);
-
-    $(document.body).append($div);
-
-    return $span;
+    });
 }
